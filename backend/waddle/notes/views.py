@@ -10,7 +10,8 @@ import fitz
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from .utils import summarize_text
-
+import json
+from rest_framework.parsers import MultiPartParser
 
 # Create your views here.
 class FolderListView(APIView):
@@ -125,34 +126,56 @@ class NoteDetailView(APIView):
 
 
 class UploadPDFView(APIView):
-    permission_classes=[IsAuthenticated]
+    parser_classes = [MultiPartParser]
+    permission_classes = [IsAuthenticated]
 
-    def post(self,request):
-        uploadedFile=request.FILES.get("pdf_file")
-        min_length=request.data.get("min_length",50)
-        max_length=request.data.get("max_length",200)
-
+    def post(self, request):
+        uploadedFile = request.FILES.get("pdf_file")
+        print(uploadedFile)
+        min_length = request.data.get("min_length", 50)
+        max_length = request.data.get("max_length", 200)
 
         if not uploadedFile:
-            return Response({"error":"No pdf file uploaded"},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "No PDF file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+
         
-        pdf_path=default_storage.save(f"notes_pdfs/{uploadedFile.name}",ContentFile(uploadedFile.read()))
+        pdf_path = default_storage.save(f"notes_pdfs/{uploadedFile.name}", uploadedFile)
+
         
         extracted_text = self.extract_text_from_pdf(default_storage.path(pdf_path))
-        summary=summarize_text(extracted_text,int(min_length),int(max_length))
+
+       
+        extracted_text = extracted_text.encode("utf-8", "ignore").decode("utf-8")
+
+        print("Extracted Text:", extracted_text)
+
         
-        return Response(
-            {"pdf_file": pdf_path, "extracted_text": extracted_text, "summary_text": summary},
-            status=status.HTTP_200_OK,
-        )
-    
+        summary = summarize_text(extracted_text, int(min_length), int(max_length))
+
+        response_data = {
+            "pdf_file": pdf_path,
+            "extracted_text": extracted_text,
+            "summary_text": summary
+        }
+
+        try:
+            json.dumps(response_data)  # Ensure it's JSON serializable
+        except Exception as e:
+            return Response({"error": f"JSON serialization error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
     def extract_text_from_pdf(self, pdf_path):
         text = ""
-        with fitz.open(pdf_path) as doc:  
-            for page in doc:  
-                text += page.get_text("text") + "\n"  
-        return text  
+        with fitz.open(pdf_path) as doc:
+            for page in doc:
+                page_text = page.get_text("text")
+            
+                page_text = page_text.encode("utf-8", "ignore").decode("utf-8", "ignore")
+                text += page_text + "\n"
+
+        return text
+ 
 
 
 
