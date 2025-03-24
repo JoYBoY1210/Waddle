@@ -11,7 +11,14 @@ const UploadPdf = () => {
   const [originalText, setOriginalText] = useState("");
   const [summarisedText, setSummarisedText] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-    console.log(getCSRFTokenFromCookie())
+  const [pdfPath, setPdfPath] = useState("");
+
+
+
+    // console.log(getCSRFTokenFromCookie())
+
+
+
   const handleLogout = async () => {
     try {
       const response = await fetch("http://localhost:8000/auth/logout/", {
@@ -63,6 +70,7 @@ const UploadPdf = () => {
       const data = await response.json();
       setOriginalText(data.extracted_text);
       setSummarisedText(data.summary_text);
+      setPdfPath(data.pdf_file);
     } catch (error) {
       console.error("Upload failed:", error);
     } finally {
@@ -90,14 +98,16 @@ const UploadPdf = () => {
         </p>
 
         <button
-          className="bg-gray-800 text-white p-1.5 rounded-lg ml-5 font-semibold shadow-md hover:bg-gray-700 active:translate-y-1 transition-all"
+          className="cursor-pointer bg-gray-800 hover:bg-gray-700 p-1.5 rounded-lg ml-5 text-white font-semibold transition-all 
+                shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:shadow-[4px_3px_0_0_rgba(0,0,0,0.8)] active:translate-y-1 active:shadow-none"
           onClick={() => navigate("/")}
         >
           Dashboard
         </button>
 
         <button
-          className="bg-gray-800 text-white p-1.5 rounded-lg ml-5 font-semibold shadow-md hover:bg-gray-700 active:translate-y-1 transition-all"
+          className="cursor-pointer bg-gray-800 hover:bg-gray-700 p-1.5 rounded-lg ml-5 text-white font-semibold transition-all 
+                shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:shadow-[4px_3px_0_0_rgba(0,0,0,0.8)] active:translate-y-1 active:shadow-none"
           onClick={handleLogout}
         >
           Logout
@@ -105,7 +115,7 @@ const UploadPdf = () => {
       </div>
 
       
-      <div className="h-full p-7 bg-black w-5/6 flex">
+      <div className="h-screen p-7 bg-black w-5/6 flex">
         <div className="bigBox flex-1 bg-white w-5/6 p-5 rounded-lg shadow-lg flex flex-col">
           <h2 className="text-xl font-bold text-gray-900">Original Text</h2>
           <div className="border border-gray-300 p-3 h-1/2 overflow-auto rounded-lg mt-2">
@@ -114,7 +124,7 @@ const UploadPdf = () => {
                 .split("\n")
                 .map((line, index) => <p key={index}>{line}</p>)
             ) : (
-              <p className="text-gray-500">No extracted text yet.</p>
+              <p className="text-gray-500">No Pdf Uploaded yet.</p>
             )}
           </div>
 
@@ -127,7 +137,7 @@ const UploadPdf = () => {
                 .split("\n")
                 .map((line, index) => <p key={index}>{line}</p>)
             ) : (
-              <p className="text-gray-500">No summary yet.</p>
+              <p className="text-gray-500">Upload Pdf to get the Summary</p>
             )}
           </div>
         </div>
@@ -178,10 +188,10 @@ const UploadPdf = () => {
             )}
           </button>
 
-          <button
+          {selectedFile&&(<button
             onClick={() =>
-              navigate("/create-note", {
-                state: { originalText, summarisedText },
+              navigate("/createNote", {
+                state: { originalText, summarisedText,pdfPath },
               })
             }
             className="bg-violet-600 text-white rounded-lg p-2 cursor-pointer transition-all 
@@ -189,6 +199,7 @@ const UploadPdf = () => {
           >
             Save as Note
           </button>
+          )}
         </div>
       </div>
     </div>

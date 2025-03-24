@@ -65,6 +65,7 @@ class FolderDetailView(APIView):
 
     def delete(self,request,pk):
         try:
+            
             folder=Folder.objects.get(id=pk,user=request.user)
             folder.delete()
             return Response({"message":"folder deleted successfully"},status=status.HTTP_204_NO_CONTENT)
@@ -235,7 +236,7 @@ class saveManualNoteView(APIView):
         title = request.data.get("title")
         content = request.data.get("content")
         summary = request.data.get("summary")
-        folder_id = request.data.get("folder_id")
+        folder_id = request.data.get("folder_id",None)
         folder_name = request.data.get("folder_name", None)
 
         if not title or not content or not summary:
