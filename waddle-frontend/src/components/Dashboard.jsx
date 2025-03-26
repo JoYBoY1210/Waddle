@@ -19,6 +19,8 @@ const Dashboard = () => {
     setSelectedNote(note);
   };
 
+
+
   const handleLogout = async () => {
     try {
       const response = await fetch("http://localhost:8000/auth/logout/", {
@@ -80,6 +82,8 @@ const Dashboard = () => {
       [folderId]: !prev[folderId],
     }));
   };
+
+  console.log(user);
 
   const handleUploadPdf =()=>{
     navigate('/uploadpdf')

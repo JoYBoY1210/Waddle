@@ -36,8 +36,8 @@ const UserContextProvider = ({ children }) => {
             }
         };
 
-        getUser(); // Call the function
-    }, []); // Run once on mount
+        getUser(); 
+    }, [isAuthenticated]); 
 
     return (
         <UserContext.Provider value={{ user, setUser, isAuthenticated, setIsAuthenticated }}>
